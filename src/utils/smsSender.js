@@ -87,10 +87,10 @@ const sendSMS = async (email, subject, message) => {
 
     try {
         const info = await transporter.sendMail(mailOptions);
-        console.log(`📧 Email sent to ${email}: ${info.response}`);
+        console.log(`Email sent to ${email}: ${info.response}`);
         return { success: true, message: 'Email Sent' };
     } catch (error) {
-        console.error(`❌ Error sending email to ${email}:`, error);
+        console.error(`Error sending email to ${email}:`, error);
         return { success: false, error: error.message };
     }
 };

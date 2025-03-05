@@ -5,8 +5,8 @@ import Billing from '../models/billingSchema.js';
 // Deduct balance for SMS usage
 export const chargeMerchant = async (req, res) => {
     try {
-        const { merchantId, amount } = req.body;
-
+        const {amount } = req.body;
+        // const merchantId=req.
         const merchant = await Merchant.findById(merchantId);
         if (!merchant) return res.status(404).json({ message: 'Merchant not found' });
 
@@ -20,7 +20,7 @@ export const chargeMerchant = async (req, res) => {
         const billingRecord = new Billing({
             merchantId,
             amount,
-            transactionId: `txn_${Date.now()}`, // Fake transaction ID
+            transactionId: `txn_${Date.now()}`, //dummy id
             status: 'Completed',
         });
 
@@ -31,19 +31,18 @@ export const chargeMerchant = async (req, res) => {
     }
 };
 
-// Fake Payment Processing (Simulated)
+// dummy payment
 export const processPayment = async (req, res) => {
     try {
-        const { merchantId, amount } = req.body;
-
+        const { amount } = req.body;
+        const merchantId=req.user._id
         const merchant = await Merchant.findById(merchantId);
         if (!merchant) return res.status(404).json({ message: 'Merchant not found' });
 
-        // Simulate a fake payment success
         const fakeTransactionId = `txn_${Date.now()}`;
 
-        // Update merchant balance
-        merchant.balance += amount;
+        // Updating merchant balance
+        merchant.balance += Number(amount);
         await merchant.save();
 
         const billingRecord = new Billing({
@@ -54,7 +53,6 @@ export const processPayment = async (req, res) => {
         });
 
         await billingRecord.save();
-        // const message="Charge successful"
         res.json({ message: 'Fake payment successful', billing: billingRecord });
         // return message
     } catch (error) {
@@ -65,7 +63,7 @@ export const processPayment = async (req, res) => {
 // Fetch billing history
 export const getBillingHistory = async (req, res) => {
     try {
-        const { merchantId } = req.params;
+        const  merchantId  = req.user._id;
         const history = await Billing.find({ merchantId }).sort({ createdAt: -1 });
 
         if (!history.length) {
@@ -77,3 +75,20 @@ export const getBillingHistory = async (req, res) => {
         res.status(500).json({ message: 'Server Error', error });
     }
 };
+
+
+export const getCredit = async (req, res) => {
+    try {
+        const  merchantId  = req.user._id;
+        console.log(merchantId)
+        const history = await Merchant.findById(merchantId).select('-password');
+
+        res.json({ credit: history.balance });
+    } catch (error) {
+        console.log(error)
+        res.status(500).json({ message: 'Server Error', error });
+    }
+};
+
+
+

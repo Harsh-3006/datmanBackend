@@ -18,10 +18,15 @@ export const createCampaign = async (req, res) => {
 
 export const getCampaigns = async (req, res) => {
     try {
-        console.log("req,user",req.user)
-        const campaigns = await Campaign.find({ merchantId: req.user._id });
+        console.log("req.user", req.user);
+        
+        const campaigns = await Campaign.find({ merchantId: req.user._id })
+            .populate('recipients', 'phone'); // Populate recipients, fetching only name & email
+
         res.json(campaigns);
     } catch (error) {
+        console.log("error", error);
         res.status(500).json({ message: 'Server Error', error });
     }
 };
+

@@ -7,10 +7,11 @@ import smsRoutes from './routes/smsRoutes.js';
 import billingRoutes from './routes/billingRoutes.js';
 import campaignRoutes from './routes/campaignRoute.js'
 import shopperRoutes from './routes/shopperRoutes.js';
+import cors from 'cors'
 
 const app = express();
 app.use(express.json());
-
+app.use(cors())
 dotenv.config({ path: '../.env' });
 
 

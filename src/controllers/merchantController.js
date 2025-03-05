@@ -13,8 +13,8 @@ export const registerMerchant = async (req, res) => {
 
         merchant = new Merchant({ name, email, phone, password });
         await merchant.save();
-
-        res.status(201).json({ message: 'Merchant registered successfully' });
+        const token = jwt.sign({ id: merchant.id }, process.env.JWT_SECRET);
+        res.status(201).json({token,merchant, message: 'Merchant registered successfully' });
     } catch (error) {
         res.status(500).json({ message: 'Server Error', error });
     }

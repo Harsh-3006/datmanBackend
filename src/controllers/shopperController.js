@@ -9,19 +9,20 @@ export const addShopper = async (req, res) => {
         let shopper = await Shopper.findOne({ phone });
 
         if (shopper) {
-            // If shopper exists, add the new merchantId (avoid duplicates)
+
             if (!shopper.merchantId.includes(merchantId)) {
                 shopper.merchantId.push(merchantId);
                 await shopper.save();
             }
         } else {
-            // Create new shopper
+            
             shopper = new Shopper({ phone, merchantId: [merchantId] });
             await shopper.save();
         }
 
         res.status(201).json({ message: 'Shopper added successfully', shopper });
     } catch (error) {
+
         res.status(500).json({ message: 'Server Error', error });
     }
 };

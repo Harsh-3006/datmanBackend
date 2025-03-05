@@ -14,11 +14,11 @@ const redisClient = createClient({
     password: process.env.REDIS_PASSWORD,
 });
 
-redisClient.on('error', (err) => console.error('❌ Redis Error:', err));
+redisClient.on('error', (err) => console.error('Redis Error:', err));
 
 const connectRedis = async () => {
     await redisClient.connect();
-    console.log('✅ Redis Connected');
+    console.log('Redis Connected');
 };
 
 connectRedis(); // Connect asynchronously
