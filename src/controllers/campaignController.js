@@ -4,9 +4,9 @@ import Campaign from "../models/campaignSchema.js";
 
 export const createCampaign = async (req, res) => {
     try {
-        const { message, recipients, scheduledAt } = req.body;
-        console.log("req.user",req.user)
-        const campaign = new Campaign({ merchantId: req.user._id, message, recipients, scheduledAt });
+        const { message, recipients, scheduledAt,subject } = req.body;
+        // console.log("req.user",req.user)
+        const campaign = new Campaign({ merchantId: req.user._id, subject,message, recipients, scheduledAt });
         await campaign.save();
 
         res.status(201).json({ message: 'Campaign created successfully', campaign });
@@ -18,7 +18,7 @@ export const createCampaign = async (req, res) => {
 
 export const getCampaigns = async (req, res) => {
     try {
-        console.log("req.user", req.user);
+        // console.log("req.user", req.user);
         
         const campaigns = await Campaign.find({ merchantId: req.user._id })
             .populate('recipients', 'phone'); // Populate recipients, fetching only name & email

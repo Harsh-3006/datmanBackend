@@ -25,7 +25,6 @@ app.use('/api/shopper', shopperRoutes);
 
 
 const PORT = process.env.PORT
-console.log(PORT)
 app.listen(PORT, () =>{ 
     connectDB();
     console.log(`Server running on port ${PORT}`)

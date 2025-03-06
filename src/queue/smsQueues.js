@@ -31,14 +31,15 @@ const worker = new Worker(
                 return;
             }
 
-            if (campaign.status === 'sent') {
+            if (campaign.status == 'sent') {
                 console.log(`Campaign ${job.data.campaignId} is already sent.`);
                 return;
             }
 
             const recipientEmails = campaign.recipients.map(r => r.phone);
-            await processCampaignNow(job.data.campaignId, recipientEmails, campaign.message);
-        } else if (job.name === 'sendSMS') {
+            await processCampaignNow(job.data.campaignId, recipientEmails, campaign.subject, campaign.message);
+        } 
+        else if (job.name === 'sendSMS') {
             console.log(`Sending SMS to: ${job.data.recipient}`);
             await sendSMS(job.data.recipient, job.data.subject, job.data.message);
         }

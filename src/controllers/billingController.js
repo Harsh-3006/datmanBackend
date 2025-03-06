@@ -5,7 +5,8 @@ import Billing from '../models/billingSchema.js';
 // Deduct balance for SMS usage
 export const chargeMerchant = async (req, res) => {
     try {
-        const {amount } = req.body;
+        const {amount,merchantId } = req.body;
+        console.log("amunt to deduct ",amount)
         // const merchantId=req.
         const merchant = await Merchant.findById(merchantId);
         if (!merchant) return res.status(404).json({ message: 'Merchant not found' });
@@ -25,9 +26,9 @@ export const chargeMerchant = async (req, res) => {
         });
 
         await billingRecord.save();
-        res.json({ message: 'Charge successful', billing: billingRecord });
+        return res.status(200).json({ message: 'Charge successful', billing: billingRecord });
     } catch (error) {
-        res.status(500).json({ message: 'Server Error', error });
+        return res.status(500).json({ message: 'Server Error', error });
     }
 };
 
@@ -80,7 +81,6 @@ export const getBillingHistory = async (req, res) => {
 export const getCredit = async (req, res) => {
     try {
         const  merchantId  = req.user._id;
-        console.log(merchantId)
         const history = await Merchant.findById(merchantId).select('-password');
 
         res.json({ credit: history.balance });

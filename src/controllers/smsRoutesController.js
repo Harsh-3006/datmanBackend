@@ -44,7 +44,6 @@ import mongoose from 'mongoose'
 export const confirmAndSendSMS = async (req, res) => {
     try {
         const campaignId = req.params.id;
-        console.log("campaignid",campaignId)
 
         // Validate ObjectId format
         if (!mongoose.Types.ObjectId.isValid(campaignId)) {
@@ -57,7 +56,7 @@ export const confirmAndSendSMS = async (req, res) => {
             return res.status(404).json({ message: 'Campaign not found' });
         }
 
-        const { message, recipients, merchantId, scheduledAt, status } = campaign;
+        const { subject,message, recipients, merchantId, scheduledAt, status } = campaign;
         if (merchantId.toString() !== req.user._id.toString()) {
             return res.status(401).json({ message: 'Unauthorized' });
         }
@@ -70,7 +69,7 @@ export const confirmAndSendSMS = async (req, res) => {
             return res.status(400).json({ message: 'No recipients found for this campaign' });
         }
 
-        console.log(`📢 Confirmed SMS job for campaign: ${campaignId}, total recipients: ${recipients.length}`);
+        console.log(`Confirmed SMS job for campaign: ${campaignId}, total recipients: ${recipients.length}`);
 
         const recipientPhones = recipients.map(recipient => recipient.phone);
 
@@ -81,22 +80,37 @@ export const confirmAndSendSMS = async (req, res) => {
         }, {
             status: () => ({ json: (data) => data })
         });
+        console.log("chargeResponse",chargeResponse)
 
-        // if (chargeResponse.message !== 'Charge successful') {
-        //     return res.status(400).json({ message: 'Insufficient balance. Please add credits.' });
-        // }
+        if (chargeResponse.message == 'Insufficient balance') {
+            campaign.status='Failed'
+            await campaign.save()
+            return res.status(400).json({ message: 'Insufficient balance. Please add credits.' });            
+        }
+
+        if (chargeResponse.message == 'Merchant not found') {
+            campaign.status='Failed'
+            await campaign.save()
+            return res.status(400).json({ message: 'Merchant not found' });            
+        }
 
         if (scheduledAt) {
             const delay = new Date(scheduledAt).getTime() - Date.now();
+            // console.log(delay)
             if (delay <= 0) {
-                return res.status(400).json({ message: 'Scheduled time must be in the future' });
+            let scheduledTime =  Date.now() + 60 * 60 * 1000;
+            campaign.scheduledAt = new Date(scheduledTime);
+                campaign.status='Pending'
+                await campaign.save()
+                return res.status(400).json({ message: 'Schedule time already passed sheduling for next hour' });
             }
 
-            console.log(`⏳ Scheduling campaign ${campaignId} at ${scheduledAt}`);
+
+            console.log(`Scheduling campaign ${campaignId} at ${scheduledAt}`);
 
             await smsQueue.add(
                 'processCampaign',
-                { campaignId: campaignId.toString() }, // Ensure it's a string
+                { campaignId: campaignId.toString() },
                 { delay }
             );
 
@@ -104,7 +118,7 @@ export const confirmAndSendSMS = async (req, res) => {
             return res.json({ message: 'Campaign scheduled successfully', scheduledAt });
         }
 
-        await processCampaignNow(campaignId.toString(), recipientPhones, message);
+        await processCampaignNow(campaignId.toString(), recipientPhones,subject, message);
         return res.json({ message: 'SMS processing started immediately' });
 
     } catch (error) {
@@ -119,17 +133,16 @@ export const confirmAndSendSMS = async (req, res) => {
 
 
 
-// 🛠 Function to process SMS (same as before)
-export const processCampaignNow = async (campaignId, recipientPhones, message) => {
+export const processCampaignNow = async (campaignId, recipientPhones, subject,message) => {
     try {
         await Promise.all(
             recipientPhones.map(async (phone) => {
-                console.log('🛠 Adding job:', { campaignId, recipient: phone, message });
+                console.log('Adding job:', { campaignId, recipient: phone, message,subject });
 
                 await smsQueue.add('sendSMS', {
                     campaignId,
                     recipient: phone,
-                    subject: "test",
+                    subject,
                     message,
                 });
             })
