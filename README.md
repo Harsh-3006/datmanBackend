@@ -5,7 +5,7 @@ This project is built using **Node.js (Express)** with **MongoDB** for data stor
 ## 🚀 How to Run the Project
 
 1️⃣ Clone the project and navigate into the directory:  
-`git clone https://github.com/your-username/your-repo-name.git && cd your-repo-name`  
+`git clone https://github.com/Harsh-3006/datmanBackend.git && cd your-repo-name`  
 
 2️⃣ Install dependencies:  
 `npm install`  
